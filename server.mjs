@@ -40,7 +40,7 @@ function isValidQuery(pathname, searchParams) {
   }
 
   const symbol = searchParams.get("symbol");
-  if (symbol && !/^[A-Z0-9]{2,22}$/.test(symbol)) return false;
+  if (symbol && !/^[\p{L}\p{N}]{2,32}$/u.test(symbol)) return false;
 
   const interval = searchParams.get("interval");
   if (interval && !/^(1s|1m|3m|5m|15m|30m|1h|2h|4h|6h|8h|12h|1d|3d|1w|1M)$/.test(interval)) {
