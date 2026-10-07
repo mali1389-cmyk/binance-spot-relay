@@ -1,4 +1,5 @@
 import http from "node:http";
+import { compactMarketData, upstreamRequestPath } from "./market-data.mjs";
 
 const PORT = Number(process.env.PORT || 10000);
 const UPSTREAMS = [
@@ -131,7 +132,10 @@ const server = http.createServer(async (request, response) => {
   }
 
   try {
-    const result = await fetchBinance(cacheKey);
+    const result = await fetchBinance(upstreamRequestPath(url));
+    if (result.status >= 200 && result.status < 300) {
+      result.body = compactMarketData(url, result.body);
+    }
     if (result.status >= 200 && result.status < 300) {
       cache.set(cacheKey, { ...result, expiresAt: Date.now() + route.ttl });
     }

@@ -1,3 +1,5 @@
+import { compactMarketData, upstreamRequestPath } from "../../market-data.mjs";
+
 const UPSTREAMS = [
   "https://data-api.binance.vision",
   "https://api.binance.com",
@@ -85,13 +87,14 @@ export default async (request) => {
   }
 
   try {
-    const { response, body } = await fetchBinance(`${url.pathname}${url.search}`);
-    return new Response(body, {
+    const { response, body } = await fetchBinance(upstreamRequestPath(url));
+    const successful = response.ok;
+    return new Response(successful ? compactMarketData(url, body) : body, {
       status: response.status,
       headers: {
         "content-type": response.headers.get("content-type") || "application/json; charset=utf-8",
-        "cache-control": `public, max-age=${ttl}`,
-        "netlify-cdn-cache-control": `public, durable, max-age=${ttl}, stale-while-revalidate=30`,
+        "cache-control": successful ? `public, max-age=${ttl}` : "no-store",
+        "netlify-cdn-cache-control": successful ? `public, durable, max-age=${ttl}, stale-while-revalidate=30` : "no-store",
         "access-control-allow-origin": "*",
         "x-content-type-options": "nosniff",
       },
